@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../Models/productos_model.dart';
 import '../store/app_colors.dart';
-import '../Services/carrito_services.dart';
+import '../services/carrito_services.dart';
+import 'carrito_screen.dart';
 
 class ProductoInfoScreen extends StatefulWidget {
   final Producto producto;
@@ -38,26 +39,46 @@ class _ProductoInfoScreenState extends State<ProductoInfoScreen> {
       isAddingToCart = true;
     });
 
-      /*try {
-        await _carritoService.agregarProductoAlCarrito(widget.producto.idProducto, cantidad);
+    try {
+      await _carritoService.agregarProductoAlCarrito(
+          widget.producto.idProducto, cantidad);
+
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Producto agregado al carrito'),
+          SnackBar(
+            content:
+                Text('Producto agregado al carrito: ${widget.producto.nombre}'),
             backgroundColor: AppColors.primary,
+            action: SnackBarAction(
+              label: 'Ver Carrito',
+              textColor: Colors.white,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const CarritoScreen()),
+                );
+              },
+            ),
           ),
         );
-      } catch (e) {
+      }
+    } catch (e) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error al agregar al carrito: $e'),
             backgroundColor: Colors.red,
           ),
         );
-      } finally {
+      }
+    } finally {
+      if (mounted) {
         setState(() {
           isAddingToCart = false;
         });
-      }*/
+      }
+    }
   }
 
   @override
@@ -78,7 +99,6 @@ class _ProductoInfoScreenState extends State<ProductoInfoScreen> {
           icon: const Icon(Icons.arrow_back, color: AppColors.icons),
           onPressed: () => Navigator.pop(context),
         ),
-        
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -323,39 +343,39 @@ class _ProductoInfoScreenState extends State<ProductoInfoScreen> {
   }
 
   Widget BuildEnExistenciaWidget(int stock) {
-  Color cantidadColor;
-  String cantidad;
+    Color cantidadColor;
+    String cantidad;
 
-  if (stock > 10) {
-    cantidadColor = Colors.green;
-    cantidad = 'En stock: $stock unidades';
-  } else if (stock > 5) {
-    cantidadColor = Colors.orange;
-    cantidad = '¡Solo quedan $stock unidades!';
-  } else {
-    cantidadColor = Colors.red;
-    cantidad = 'Agotado: 0 unidades';
+    if (stock > 10) {
+      cantidadColor = Colors.green;
+      cantidad = 'En stock: $stock unidades';
+    } else if (stock > 5) {
+      cantidadColor = Colors.orange;
+      cantidad = '¡Solo quedan $stock unidades!';
+    } else {
+      cantidadColor = Colors.red;
+      cantidad = 'Agotado: 0 unidades';
+    }
+
+    return Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: cantidadColor,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          cantidad,
+          style: TextStyle(
+            color: cantidadColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
   }
-
-  return Row(
-    children: [
-      Container(
-        width: 12,
-        height: 12,
-        decoration: BoxDecoration(
-          color: cantidadColor,
-          shape: BoxShape.circle,
-        ),
-      ),
-      const SizedBox(width: 8),
-      Text(
-        cantidad,
-        style: TextStyle(
-          color: cantidadColor,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ],
-  );
-}
 }

@@ -1,0 +1,1 @@
+/home/kbarahona/sofiglam/front/sofiglam_app_user/build/app/intermediates/cxx/Debug/5455e6q2/obj/arm64-v8a

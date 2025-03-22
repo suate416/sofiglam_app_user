@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import '../Models/productos_model.dart';
 
 class ProductoService {
-  static const String _baseUrl = 'http://10.0.2.2:3008/api/productos';
+  static const String _baseUrl = 'http://10.0.2.2:3009/api/productos';
 
   Future<List<Producto>> fetchProductos() async {
     final response = await http.get(Uri.parse(_baseUrl));

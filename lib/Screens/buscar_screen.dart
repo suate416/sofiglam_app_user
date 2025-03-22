@@ -58,8 +58,8 @@ class _BuscarScreenState extends State<BuscarScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
           child: Center(
             child: Text(
               'Buscar Joyas',
@@ -153,24 +153,24 @@ class _BuscarScreenState extends State<BuscarScreen> {
                 );
               } else {
                 if (searchQuery.isEmpty) {
-                  return Center(
+                  return const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.search, size: 80, color: AppColors.subtitle),
-                        const SizedBox(height: 20),
-                        const Text(
+                        Icon(Icons.search, size: 80, color: AppColors.subtitle),
+                        SizedBox(height: 20),
+                        Text(
                           "Busca tus joyas favoritas",
                           style: TextStyle(fontSize: 20, color: AppColors.subtitle),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 10),
-                        const Text(
+                        SizedBox(height: 10),
+                        Text(
                           "Puedes buscar por nombre, categoría o material",
                           style: TextStyle(fontSize: 14, color: AppColors.subtitle),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 30),
+                        SizedBox(height: 30),
                       ],
                     ),
                   );

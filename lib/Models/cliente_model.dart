@@ -1,43 +1,45 @@
+
 class Cliente {
-  final int idCliente;
+  final int? idCliente;
   final String nombre;
-  final String? apellido;
-  final String? email;
-  final String? telefono;
-  final String? direccion;
- 
-  
+  final String apellido;
+  final String email;
+  final String direccion;
+  final String telefono;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
   Cliente({
-    required this.idCliente,
+    this.idCliente,
     required this.nombre,
-    this.apellido,
-    this.email,
-    this.telefono,
-    this.direccion,
- 
+    required this.apellido,
+    required this.email,
+    required this.direccion,
+    required this.telefono,
+    this.createdAt,
+    this.updatedAt,
   });
-  
+
   factory Cliente.fromJson(Map<String, dynamic> json) {
     return Cliente(
       idCliente: json['id_cliente'],
       nombre: json['nombre'],
       apellido: json['apellido'],
-      email: json['email'],
-      telefono: json['telefono'],
+      email: json['email'] ?? '',
       direccion: json['direccion'],
- 
+      telefono: json['telefono'],
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : null,
+      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : null,
     );
   }
-  
+
   Map<String, dynamic> toJson() {
     return {
-      'id_cliente': idCliente,
       'nombre': nombre,
       'apellido': apellido,
       'email': email,
-      'telefono': telefono,
       'direccion': direccion,
- 
+      'telefono': telefono,
     };
   }
 }

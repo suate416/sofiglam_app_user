@@ -36,6 +36,9 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   http: ^1.3.0
+  pull_to_refresh: ^2.0.0
+  flutter_native_splash: ^2.4.0
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:
@@ -89,3 +92,27 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+  assets:
+    - asssets/images/
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: asssets/images/logo_sofiglam.png
+  branding: asssets/images/logo_sofiglam.png
+  color_dark: "#FFFFFF"
+  image_dark: asssets/images/logo_sofiglam.png
+  branding_dark: asssets/images/logo_sofiglam.png
+
+  android_12:
+    image: asssets/images/logo_sofiglam.png
+    icon_background_color: "#FFFFFF"
+    image_dark: asssets/images/logo_sofiglam.png
+    icon_background_color_dark: "#FFFFFF"
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "asssets/images/logo_sofiglam.png"
+  min_sdk_android: 21
+  remove_alpha_ios: true

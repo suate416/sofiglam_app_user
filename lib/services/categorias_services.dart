@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import '../Models/categoria_model.dart';
 
 class CategoriaService {
-  static const String _baseUrl = 'http://10.0.2.2:3008/api/categorias';
+  static const String _baseUrl = 'http://10.0.2.2:3009/api/categorias';
 
   Future<List<Categoria>> fetchCategorias() async {
     try {

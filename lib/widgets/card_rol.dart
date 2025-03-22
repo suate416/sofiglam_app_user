@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-//import '../Screens/carrito_screen.dart';
+import '../Screens/carrito_screen.dart';
 import '../store/app_colors.dart';
 
 class CardRol extends StatelessWidget {
@@ -34,7 +34,13 @@ class CardRol extends StatelessWidget {
             children: [
               Text(
                 rol,
-                style: const TextStyle(color: AppColors.title, fontSize: 40),
+                style: const TextStyle(
+                  color: Color.fromARGB(255, 54, 40, 1),
+                  fontSize: 50,
+                  fontFamily: 'cursive',
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 2,
+                ),
               ),
             ],
           ),
@@ -44,10 +50,12 @@ class CardRol extends StatelessWidget {
                 color: AppColors.primary,
                 size: 40,
               ),
-              /*onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => CarritoScreen()));
-              } */)
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CarritoScreen()));
+              })
         ],
       ),
     );

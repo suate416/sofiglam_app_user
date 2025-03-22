@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../Models/productos_model.dart';
 import '../Models/categoria_model.dart';
 import 'info_screen.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import '../services/producto_services.dart';
 import '../store/app_colors.dart';
@@ -30,6 +31,8 @@ class _TiendaScreenState extends State<TiendaScreen> {
   };
   String? materialSeleccionado = "Todos";
   String? generoSeleccionado = "Todos";
+  final RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
 
   @override
   void initState() {
@@ -37,15 +40,29 @@ class _TiendaScreenState extends State<TiendaScreen> {
     futureProductos = ProductoService().fetchProductos();
   }
 
+  void _onRefresh() async {
+    // Actualizar datos al hacer el pull down refresh
+    setState(() {
+      futureProductos = ProductoService().fetchProductos();
+    });
+    // Si la carga fue exitosa, finaliza la animación de refresh
+    await Future.delayed(const Duration(milliseconds: 1000));
+    _refreshController.refreshCompleted();
+  }
+
+  void _onLoading() async {
+    // Cargar más datos si es necesario
+    await Future.delayed(const Duration(milliseconds: 1000));
+    _refreshController.loadComplete();
+  }
+
   List<Categoria> extractCategorias(List<Producto> productos) {
     final Map<int, Categoria?> categoriasMap = {};
 
     for (var producto in productos) {
-      if (producto.categoria != null) {
-        categoriasMap[producto.idCategoria] = producto.categoria;
-      }
+      categoriasMap[producto.idCategoria] = producto.categoria;
     }
-                                        
+
     return categoriasMap.values.whereType<Categoria>().toList();
   }
 
@@ -54,13 +71,10 @@ class _TiendaScreenState extends State<TiendaScreen> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
           child: Center(
-            child: Text(
-              'Joyas Exclusivas',
-              style: tituloScreenFont,
-            ),
+            
           ),
         ),
         FutureBuilder<List<Producto>>(
@@ -239,139 +253,157 @@ class _TiendaScreenState extends State<TiendaScreen> {
                   );
                 }
 
-                return GridView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.all(8.0),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 0.7,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
+                return SmartRefresher(
+                  enablePullDown: true,
+                  header: const WaterDropHeader(
+                    waterDropColor: AppColors.primary,
+                    complete: Icon(Icons.check, color: AppColors.primary),
                   ),
-                  itemCount: productosFiltrados.length,
-                  itemBuilder: (context, index) {
-                    final producto = productosFiltrados[index];
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ProductoInfoScreen(producto: producto),
+                  controller: _refreshController,
+                  onRefresh: _onRefresh,
+                  onLoading: _onLoading,
+                  child: GridView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(8.0),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.7,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                    ),
+                    itemCount: productosFiltrados.length,
+                    itemBuilder: (context, index) {
+                      final producto = productosFiltrados[index];
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ProductoInfoScreen(producto: producto),
+                            ),
+                          );
+                        },
+                        child: Card(
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                        );
-                      },
-                      child: Card(
-                        color: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        elevation: 5,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(
-                              child: ClipRRect(
-                                borderRadius: const BorderRadius.only(
-                                  topLeft: Radius.circular(10),
-                                  topRight: Radius.circular(10),
-                                ),
-                                child: producto.file != null 
-                                  ? Image.network(
-                                      producto.file!,
-                                      fit: BoxFit.cover,
-                                      loadingBuilder:
-                                          (context, child, loadingProgress) {
-                                        if (loadingProgress == null) return child;
-                                        return Container(
-                                          color: Colors.grey[200],
-                                          child: Center(
-                                            child: CircularProgressIndicator(
-                                              value: loadingProgress
-                                                          .expectedTotalBytes !=
-                                                      null
-                                                  ? loadingProgress
-                                                          .cumulativeBytesLoaded /
-                                                      (loadingProgress
-                                                              .expectedTotalBytes ??
-                                                          1)
-                                                  : null,
-                                              color: AppColors.primary,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return Container(
+                          elevation: 5,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(10),
+                                    topRight: Radius.circular(10),
+                                  ),
+                                  child: producto.file != null
+                                      ? Image.network(
+                                          producto.file,
+                                          fit: BoxFit.cover,
+                                          loadingBuilder: (context, child,
+                                              loadingProgress) {
+                                            if (loadingProgress == null) {
+                                              return child;
+                                            }
+                                            return Container(
+                                              color: Colors.grey[200],
+                                              child: Center(
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  value: loadingProgress
+                                                              .expectedTotalBytes !=
+                                                          null
+                                                      ? loadingProgress
+                                                              .cumulativeBytesLoaded /
+                                                          (loadingProgress
+                                                                  .expectedTotalBytes ??
+                                                              1)
+                                                      : null,
+                                                  color: AppColors.primary,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                            return Container(
+                                              color: Colors.grey[200],
+                                              child: const Center(
+                                                child: Icon(
+                                                    Icons.image_not_supported,
+                                                    size: 50),
+                                              ),
+                                            );
+                                          },
+                                        )
+                                      : Container(
                                           color: Colors.grey[200],
                                           child: const Center(
-                                            child: Icon(Icons.image_not_supported,
+                                            child: Icon(
+                                                Icons.image_not_supported,
                                                 size: 50),
                                           ),
-                                        );
-                                      },
-                                    )
-                                  : Container(
-                                      color: Colors.grey[200],
-                                      child: const Center(
-                                        child: Icon(Icons.image_not_supported,
-                                            size: 50),
-                                      ),
-                                    ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    producto.nombre,
-                                    textAlign: TextAlign.left,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        producto.material,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: AppColors.subtitle,
                                         ),
-                                      ),
-                                      const Spacer(),
-                                      Text(
-                                        producto.genero,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: AppColors.subtitle,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    "LPS. ${producto.precio.toStringAsFixed(2)}",
-                                    textAlign: TextAlign.left,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ],
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      producto.nombre,
+                                      textAlign: TextAlign.left,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          producto.material,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: AppColors.subtitle,
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        Text(
+                                          producto.genero,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: AppColors.subtitle,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      "LPS. ${producto.precio.toStringAsFixed(2)}",
+                                      textAlign: TextAlign.left,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 );
               }
             },
@@ -427,27 +459,24 @@ class _TiendaScreenState extends State<TiendaScreen> {
 
   List<Producto> _filtrarProductos(List<Producto> productos) {
     return productos.where((producto) {
+      bool filtroPorCategoria = activo == 0;
 
-      bool filtroPorCategoria = activo == 0; 
-      
-      if (activo > 0 && categorias.isNotEmpty && activo - 1 < categorias.length) {
-        
+      if (activo > 0 &&
+          categorias.isNotEmpty &&
+          activo - 1 < categorias.length) {
         String selectedCategoryName = categorias[activo - 1].nombre;
-        
-        
-        if (producto.categoria != null) {
-          filtroPorCategoria = producto.categoria!.nombre.toLowerCase() == selectedCategoryName.toLowerCase();
-        } else {
-          filtroPorCategoria = false; 
-        }
+
+        filtroPorCategoria = producto.categoria.nombre.toLowerCase() ==
+            selectedCategoryName.toLowerCase();
       }
 
       // Filter by material
-      bool filtroPorMaterial = materialSeleccionado == "Todos" || 
-          producto.material.toLowerCase() == materialSeleccionado?.toLowerCase();
+      bool filtroPorMaterial = materialSeleccionado == "Todos" ||
+          producto.material.toLowerCase() ==
+              materialSeleccionado?.toLowerCase();
 
       // Filter by gender
-      bool filtroPorGenero = generoSeleccionado == "Todos" || 
+      bool filtroPorGenero = generoSeleccionado == "Todos" ||
           producto.genero.toLowerCase() == generoSeleccionado?.toLowerCase();
 
       return filtroPorCategoria && filtroPorMaterial && filtroPorGenero;
